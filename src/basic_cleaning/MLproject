@@ -6,27 +6,27 @@ entry_points:
     parameters:
 
       input_artifact:
-        description: Ininital artifact to be cleaned
+        description: Fully-qualified name for input artifact
         type: string
 
       output_artifact:
-        description: Output artifact for cleaned data
+        description: Name of output artifact
         type: string
 
       output_type:
-        description: Type of the output dataset
+        description: Artifact Type
         type: string
 
       output_description:
-        description: Description of the output dataset
+        description: Artifact's Description
         type: string
 
       min_price:
-        description: Minimum house price to be considered
+        description: Min. price for outlier cleaning
         type: float
 
       max_price:
-        description: Maximum house price to be considered
+        description: Max. price for outlier cleaning
         type: float
 
 
