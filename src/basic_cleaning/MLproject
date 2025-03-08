@@ -1,4 +1,4 @@
-name: basic_cleaning
+nname: basic_cleaning
 conda_env: conda.yml
 
 entry_points:
@@ -6,27 +6,27 @@ entry_points:
     parameters:
 
       input_artifact:
-        description: Fully-qualified name for input artifact
+        description: Ininital artifact to be cleaned
         type: string
 
       output_artifact:
-        description: Name of output artifact
+        description: Output artifact for cleaned data
         type: string
 
       output_type:
-        description: Artifact Type
+        description: Type of the output dataset
         type: string
 
       output_description:
-        description: Artifact's Description
+        description: Description of the output dataset
         type: string
 
       min_price:
-        description: Min. price for outlier cleaning
+        description: Minimum house price to be considered
         type: float
 
       max_price:
-        description: Max. price for outlier cleaning
+        description: Maximum house price to be considered
         type: float
 
 
