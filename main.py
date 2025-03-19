@@ -96,7 +96,7 @@ def go(config: DictConfig):
 
             # NOTE: we need to serialize the random forest configuration into JSON
              rf_config = os.path.abspath("rf_config.json")
-            with open(rf_config, "w+") as file:
+             with open(rf_config, "w+") as file:
                 json.dump(
                     dict(
                         config["modeling"]["random_forest"].items()),
@@ -117,7 +117,6 @@ def go(config: DictConfig):
                     "max_tfidf_features": config["modeling"]["max_tfidf_features"],
                     "output_artifact": "random_forest_export"},
             )
-        
             pass
 
         if "test_regression_model" in active_steps:
