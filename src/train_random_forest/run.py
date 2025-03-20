@@ -88,6 +88,8 @@ def go(args):
     if os.path.exists("random_forest_dir"):
         shutil.rmtree("random_forest_dir")
 
+    X_val[processed_features] = X_val[processed_features].astype(str)    
+
     signature = mlflow.models.infer_signature(X_val[processed_features], y_pred)
 
     with tempfile.TemporaryDirectory() as temp_dir:
