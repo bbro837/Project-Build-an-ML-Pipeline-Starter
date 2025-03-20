@@ -89,6 +89,7 @@ def go(args):
         shutil.rmtree("random_forest_dir")
 
     X_val[processed_features] = X_val[processed_features].astype(str)    
+    X_val[processed_features] = X_val[processed_features].fillna("missing_value")
 
     signature = mlflow.models.infer_signature(X_val[processed_features], y_pred)
 
