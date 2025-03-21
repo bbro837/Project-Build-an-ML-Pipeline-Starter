@@ -266,10 +266,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--rf_config",
+       "--rf_config",
+        type=str,
         help="Random forest configuration. A JSON dict that will be passed to the "
              "scikit-learn constructor for RandomForestRegressor.",
-        default="{}",
+        default=None,
     )
 
     parser.add_argument(
