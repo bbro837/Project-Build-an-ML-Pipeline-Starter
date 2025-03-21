@@ -5,7 +5,6 @@ This script trains a Random Forest
 import argparse
 import logging
 import os
-import tempfile
 import shutil
 import matplotlib.pyplot as plt
 
@@ -14,6 +13,7 @@ import json
 
 import pandas as pd
 import numpy as np
+from mlflow.models import infer_signature
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.impute import SimpleImputer
@@ -24,7 +24,6 @@ import wandb
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.pipeline import Pipeline, make_pipeline
-from mlflow.models.signature import infer_signature
 
 
 def delta_date_feature(dates):
@@ -33,7 +32,7 @@ def delta_date_feature(dates):
     between each date and the most recent date in its column
     """
     date_sanitized = pd.DataFrame(dates).apply(pd.to_datetime)
-    return date_sanitized.apply(lambda d: (d.max() -d).dt.days, axis=0).to_numpy()
+    return date_sanitized.apply(lambda d: (d.max() - d).dt.days, axis=0).to_numpy()
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
@@ -41,7 +40,6 @@ logger = logging.getLogger()
 
 
 def go(args):
-    
     run = wandb.init(job_type="train_random_forest")
     run.config.update(args)
 
@@ -53,8 +51,9 @@ def go(args):
     # Fix the random seed for the Random Forest, so we get reproducible results
     rf_config['random_state'] = args.random_seed
 
-    # Use run.use_artifact(...).file() to get the train and validation artifact
+    # Use run.use_artifact(...).file() to get the train and validation artifact (args.trainval_artifact)
     # and save the returned path in train_local_pat
+    logger.info("Downloading training set artifact")
     trainval_local_path = run.use_artifact(args.trainval_artifact).file()
 
     X = pd.read_csv(trainval_local_path)
@@ -72,6 +71,8 @@ def go(args):
 
     # Then fit it to the X_train, y_train data
     logger.info("Fitting")
+
+    # Fit the pipeline sk_pipe by calling the .fit method on X_train and y_train
     sk_pipe.fit(X_train, y_train)
 
     # Compute r2 and MAE
@@ -90,10 +91,12 @@ def go(args):
     if os.path.exists("random_forest_dir"):
         shutil.rmtree("random_forest_dir")
 
+    # Save the sk_pipe pipeline as a mlflow.sklearn model in the directory "random_forest_dir"
+
     export_path = "random_forest_dir"
     signature = infer_signature(X_val, y_pred)
 
-mlflow.sklearn.save_model(
+    mlflow.sklearn.save_model(
         sk_pipe,
         export_path,
         signature=signature,
@@ -267,11 +270,10 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-       "--rf_config",
-        type=str,
+        "--rf_config",
         help="Random forest configuration. A JSON dict that will be passed to the "
              "scikit-learn constructor for RandomForestRegressor.",
-        default=None,
+        default="{}",
     )
 
     parser.add_argument(
