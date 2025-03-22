@@ -51,6 +51,8 @@ def go(args):
     # Fix the random seed for the Random Forest, so we get reproducible results
     rf_config['random_state'] = args.random_seed
 
+    logger.info(f"Random Forest configuration: {rf_config}")
+
     # Use run.use_artifact(...).file() to get the train and validation artifact (args.trainval_artifact)
     # and save the returned path in train_local_pat
     logger.info("Downloading training set artifact")
