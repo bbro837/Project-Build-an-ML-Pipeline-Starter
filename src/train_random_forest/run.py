@@ -65,6 +65,9 @@ def go(args):
         X, y, test_size=args.val_size, stratify=X[args.stratify_by], random_state=args.random_seed
     )
 
+    logger.info(f"Training dataset sample:\n{X_train.head()}")
+    logger.info(f"Validation dataset sample:\n{X_val.head()}")
+
     logger.info("Preparing sklearn pipeline")
 
     sk_pipe, processed_features = get_inference_pipeline(rf_config, args.max_tfidf_features)
