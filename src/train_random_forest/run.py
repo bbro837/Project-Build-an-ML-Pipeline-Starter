@@ -13,7 +13,7 @@ import json
 
 import pandas as pd
 import numpy as np
-from mlflow.models import infer_signature
+from mlflow.models.signature import infer_signature
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.impute import SimpleImputer
@@ -67,6 +67,14 @@ def go(args):
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=args.val_size, stratify=X[args.stratify_by], random_state=args.random_seed
     )
+
+    for col in X_val.select_dtypes(include=['object']).columns:
+        X_val[col] = X_val[col].astype(str)
+
+    X_val = X_val.fillna("missing_value")
+    
+    for col in X_val.columns:
+    print(f"{col}: {X_val[col].apply(type).unique()}")
 
     logger.info(f"Training dataset sample:\n{X_train.head()}")
     logger.info(f"Validation dataset sample:\n{X_val.head()}")
