@@ -72,9 +72,9 @@ def go(args):
         X_val[col] = X_val[col].astype(str)
 
     X_val = X_val.fillna("missing_value")
-    
+
     for col in X_val.columns:
-    print(f"{col}: {X_val[col].apply(type).unique()}")
+        print(f"{col}: {X_val[col].apply(type).unique()}")
 
     logger.info(f"Training dataset sample:\n{X_train.head()}")
     logger.info(f"Validation dataset sample:\n{X_val.head()}")
