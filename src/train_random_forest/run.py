@@ -65,6 +65,8 @@ def go(args):
 
     logger.info(f"Minimum price: {y.min()}, Maximum price: {y.max()}")
 
+    X_val = X_val.astype({col: "string" for col in X_val.select_dtypes(include=["object"]).columns})
+
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=args.val_size, stratify=X[args.stratify_by], random_state=args.random_seed
     )
