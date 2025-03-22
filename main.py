@@ -23,7 +23,18 @@ _steps = [
 # This automatically reads in the configuration
 @hydra.main(config_name='config')
 def go(config: DictConfig):
-
+    mlflow.run(
+        ".",
+        entry_point="train_random_forest",
+        parameters={
+            "trainval_artifact": cfg.steps.train_random_forest.trainval_artifact,
+            "val_size": cfg.steps.train_random_forest.val_size,
+            "random_seed": cfg.steps.train_random_forest.random_seed,
+            "stratify_by": cfg.steps.train_random_forest.stratify_by,
+            "rf_config": cfg.steps.train_random_forest.rf_config,
+            "max_tfidf_features": cfg.steps.train_random_forest.max_tfidf_features,
+            "output_artifact": cfg.steps.train_random_forest.output_artifact,
+        },
     # Setup the wandb experiment. All runs will be grouped under this name
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
@@ -120,11 +131,15 @@ def go(config: DictConfig):
             pass
 
         if "test_regression_model" in active_steps:
-
-            ##################
-            # Implement here #
-            ##################
-
+        
+            _ = mlflow.run(
+                f"{config['main']['components_repository']}/test_regression_model",
+                "main",
+                parameters={
+                    "mlflow_model": "random_forest_export:prod",
+                    "test_dataset": "test_data.csv:latest"
+                }
+            )
             pass
 
 
