@@ -44,12 +44,8 @@ def go(args):
     run.config.update(args)
 
     # Get the Random Forest configuration and update W&B
-    if args.rf_config:
-       with open(args.rf_config) as fp:
+    with open(args.rf_config) as fp:
         rf_config = json.load(fp)
-    else:
-        rf_config = {}  # Default empty configuration
-    
     run.config.update(rf_config)
 
     # Fix the random seed for the Random Forest, so we get reproducible results
@@ -64,8 +60,6 @@ def go(args):
     y = X.pop("price")  # this removes the column "price" from X and puts it into y
 
     logger.info(f"Minimum price: {y.min()}, Maximum price: {y.max()}")
-
-    X_val = X_val.astype({col: "string" for col in X_val.select_dtypes(include=["object"]).columns})
 
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=args.val_size, stratify=X[args.stratify_by], random_state=args.random_seed
@@ -279,7 +273,7 @@ if __name__ == "__main__":
         "--rf_config",
         help="Random forest configuration. A JSON dict that will be passed to the "
              "scikit-learn constructor for RandomForestRegressor.",
-        default=None,
+        default="{}",
     )
 
     parser.add_argument(

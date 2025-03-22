@@ -23,18 +23,7 @@ _steps = [
 # This automatically reads in the configuration
 @hydra.main(config_name='config')
 def go(config: DictConfig):
-    mlflow.run(
-        ".",
-        entry_point="train_random_forest",
-        parameters={
-            "trainval_artifact": cfg.steps.train_random_forest.trainval_artifact,
-            "val_size": cfg.steps.train_random_forest.val_size,
-            "random_seed": cfg.steps.train_random_forest.random_seed,
-            "stratify_by": cfg.steps.train_random_forest.stratify_by,
-            "rf_config": cfg.steps.train_random_forest.rf_config,
-            "max_tfidf_features": cfg.steps.train_random_forest.max_tfidf_features,
-            "output_artifact": cfg.steps.train_random_forest.output_artifact,
-        },
+
     # Setup the wandb experiment. All runs will be grouped under this name
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
@@ -51,8 +40,6 @@ def go(config: DictConfig):
             _ = mlflow.run(
                 f"{config['main']['components_repository']}/get_data",
                 "main",
-                version='main',
-                env_manager="conda",
                 parameters={
                     "sample": config["etl"]["sample"],
                     "artifact_name": "sample.csv",
@@ -74,7 +61,6 @@ def go(config: DictConfig):
                     "max_price": config['etl']['max_price']
                 },
             )
-            pass
 
         if "data_check" in active_steps:
             _ = mlflow.run(
@@ -88,7 +74,6 @@ def go(config: DictConfig):
                     "max_price": config['etl']['max_price']
                 }
             )
-            pass
 
         if "data_split" in active_steps:
             _ = mlflow.run(
@@ -101,23 +86,19 @@ def go(config: DictConfig):
                     "stratify_by": config["modeling"]["stratify_by"]
                 }
             )
-            pass
 
         if "train_random_forest" in active_steps:
 
             # NOTE: we need to serialize the random forest configuration into JSON
             rf_config = os.path.abspath("rf_config.json")
-            with open(rf_config, "w+") as file:
-                json.dump(
-                    dict(
-                        config["modeling"]["random_forest"].items()),
-                    file)
+            with open(rf_config, "w+") as fp:
+                json.dump(dict(config["modeling"]["random_forest"].items()), fp)  # DO NOT TOUCH
+
+            # NOTE: use the rf_config we just created as the rf_config parameter for the train_random_forest
+            # step
 
             _ = mlflow.run(
-                os.path.join(
-                    hydra.utils.get_original_cwd(),
-                    "src",
-                    "train_random_forest"),
+                os.path.join(hydra.utils.get_original_cwd(), "src", "train_random_forest"),
                 "main",
                 parameters={
                     "trainval_artifact": "trainval_data.csv:latest",
@@ -126,12 +107,11 @@ def go(config: DictConfig):
                     "stratify_by": config["modeling"]["stratify_by"],
                     "rf_config": rf_config,
                     "max_tfidf_features": config["modeling"]["max_tfidf_features"],
-                    "output_artifact": "random_forest_export"},
+                    "output_artifact": "random_forest_export"
+                }
             )
-            pass
 
         if "test_regression_model" in active_steps:
-        
             _ = mlflow.run(
                 f"{config['main']['components_repository']}/test_regression_model",
                 "main",
@@ -140,7 +120,6 @@ def go(config: DictConfig):
                     "test_dataset": "test_data.csv:latest"
                 }
             )
-            pass
 
 
 if __name__ == "__main__":
