@@ -44,8 +44,12 @@ def go(args):
     run.config.update(args)
 
     # Get the Random Forest configuration and update W&B
-    with open(args.rf_config) as fp:
+    if args.rf_config:
+       with open(args.rf_config) as fp:
         rf_config = json.load(fp)
+    else:
+        rf_config = {}  # Default empty configuration
+    
     run.config.update(rf_config)
 
     # Fix the random seed for the Random Forest, so we get reproducible results
@@ -273,7 +277,7 @@ if __name__ == "__main__":
         "--rf_config",
         help="Random forest configuration. A JSON dict that will be passed to the "
              "scikit-learn constructor for RandomForestRegressor.",
-        default="{}",
+        default=None,
     )
 
     parser.add_argument(
