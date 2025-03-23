@@ -6,6 +6,7 @@ import os
 import wandb
 import hydra
 from omegaconf import DictConfig
+from mlflow.exceptions import ExecutionException
 
 _steps = [
     "download",
@@ -112,14 +113,18 @@ def go(config: DictConfig):
             )
 
         if "test_regression_model" in active_steps:
-            _ = mlflow.run(
-                f"{config['main']['components_repository']}/test_regression_model",
-                "main",
-                parameters={
-                    "mlflow_model": "random_forest_export:prod",
-                    "test_dataset": "test_data.csv:latest"
-                }
-            )
+            try:
+                _ = mlflow.run(
+                    f"{config['main']['components_repository']}/test_regression_model",
+                    "main",
+                    parameters={
+                        "mlflow_model": "random_forest_export:prod",
+                        "test_dataset": "test_data.csv:latest"
+                    }
+                )
+            except ExecutionException as e:
+                print(f"Error: MLflow run failed with message: {e}")
+                raise
 
 
 if __name__ == "__main__":
